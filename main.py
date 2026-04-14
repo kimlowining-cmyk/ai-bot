@@ -1,3 +1,5 @@
+import os
+
 from fastapi import FastAPI, Depends
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
@@ -14,7 +16,7 @@ app = FastAPI()
 
 client = OpenAI(
     base_url="https://openrouter.ai/api/v1",
-    api_key="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"
+    api_key=os.getenv("OPENROUTER_API_KEY")
 )
 
 # ===== 数据库依赖 =====
@@ -38,7 +40,9 @@ class SettingsUpdate(BaseModel):
 def get_or_create_settings(db: Session):
     settings = db.query(AISettings).first()
     if not settings:
-        settings = AISettings(system_prompt="You are a professional English sales assistant.")
+        settings = AISettings(
+            system_prompt="You are a professional English sales assistant."
+        )
         db.add(settings)
         db.commit()
         db.refresh(settings)
@@ -63,34 +67,31 @@ def chat(req: ChatRequest, db: Session = Depends(get_db)):
         response = client.chat.completions.create(
             model="openai/gpt-4o-mini",
             messages=[
-    {
-        "role": "system",
-        "content": f"""
+                {
+                    "role": "system",
+                    "content": f"""
 You are a professional stock trading assistant.
 
 Your purpose:
 - Help users understand their trading problems
 - Build trust through useful insights
-- Guide them to join a trading group where they can learn more
+- Guide them to join a trading group
 
 Rules:
-- Stay on topic (stock trading only)
-- Never give generic life advice
-- Never go off-topic (no fitness, no general goals)
-- Be practical, not theoretical
-- Speak like an experienced trader
+- Only talk about trading
+- Be practical
+- Speak like a pro trader
 
 {system_prompt}
 """
-    },
-    {
-        "role": "user",
-        "content": req.message
-    }
-
+                },
+                {
+                    "role": "user",
+                    "content": req.message
+                }
             ],
             extra_headers={
-                "HTTP-Referer": "http://localhost:8030",
+                "HTTP-Referer": "https://ai-bot-9txy.onrender.com",
                 "X-Title": "ai-bot"
             }
         )
