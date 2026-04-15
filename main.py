@@ -108,13 +108,12 @@ Rules:
 
         return {"reply": reply}
 
-    except Exception as e:
+except Exception as e:
     import traceback
     return {
         "error": str(e),
         "trace": traceback.format_exc()
     }
-
 # ===== 查看当前 AI 设置 =====
 @app.get("/admin/settings")
 def get_settings(db: Session = Depends(get_db)):
