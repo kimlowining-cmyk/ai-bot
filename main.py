@@ -1,3 +1,4 @@
+print("API KEY:", os.getenv("OPENROUTER_API_KEY"))
 import os
 
 from fastapi import FastAPI, Depends
@@ -110,7 +111,11 @@ Rules:
         return {"reply": reply}
 
     except Exception as e:
-        return {"error": str(e)}
+    import traceback
+    return {
+        "error": str(e),
+        "trace": traceback.format_exc()
+    }
 
 # ===== 查看当前 AI 设置 =====
 @app.get("/admin/settings")
