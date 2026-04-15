@@ -45,6 +45,29 @@ def get_or_create_settings(db: Session):
         db.refresh(settings)
     return settings
 
+from fastapi import FastAPI, Request
+
+app = FastAPI()
+
+VERIFY_TOKEN = "abc123"
+
+# ✅ 这里加（位置1：推荐放在最上面）
+@app.get("/webhook")
+async def verify(request: Request):
+    params = request.query_params
+
+    if params.get("hub.mode") == "subscribe" and params.get("hub.verify_token") == VERIFY_TOKEN:
+        return int(params.get("hub.challenge"))
+
+    return {"error": "verify failed"}
+
+
+@app.post("/webhook")
+async def webhook(request: Request):
+    data = await request.json()
+    print(data)
+    return {"status": "ok"}
+
 @app.post("/chat")
 def chat(req: ChatRequest, db: Session = Depends(get_db)):
     try:
