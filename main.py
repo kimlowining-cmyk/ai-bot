@@ -65,37 +65,35 @@ def chat(req: ChatRequest, db: Session = Depends(get_db)):
         db.add(user_msg)
         db.commit()
 
-        response = client.chat.completions.create(
-            model="openai/gpt-4o-mini",
-            messages=[
-                {
-                    "role": "system",
-                    "content": f"""
+response = client.chat.completions.create(
+    model="openai/gpt-4o-mini",
+    messages=[
+        {
+            "role": "system",
+            "content": f"""
 You are a professional stock trading assistant.
 
 Your purpose:
 - Help users understand their trading problems
 - Build trust through useful insights
-- Guide them to join a trading group
+- Guide them to join a trading group where they can learn more
 
 Rules:
-- Only talk about trading
-- Be practical
-- Speak like a pro trader
+- Stay on topic (stock trading only)
+- Never give generic life advice
+- Never go off-topic
+- Be practical, not theoretical
+- Speak like an experienced trader
 
 {system_prompt}
 """
-                },
-                {
-                    "role": "user",
-                    "content": req.message
-                }
-            ],
-            extra_headers={
-                "HTTP-Referer": "https://ai-bot-9txy.onrender.com",
-                "X-Title": "ai-bot"
-            }
-        )
+        },
+        {
+            "role": "user",
+            "content": req.message
+        }
+    ]
+)
 
         reply = response.choices[0].message.content
 
