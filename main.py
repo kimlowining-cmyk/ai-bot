@@ -65,12 +65,12 @@ def chat(req: ChatRequest, db: Session = Depends(get_db)):
         db.add(user_msg)
         db.commit()
 
-response = client.chat.completions.create(
-    model="openai/gpt-4o-mini",
-    messages=[
-        {
-            "role": "system",
-            "content": f"""
+        response = client.chat.completions.create(
+            model="openai/gpt-4o-mini",
+            messages=[
+                {
+                    "role": "system",
+                    "content": f"""
 You are a professional stock trading assistant.
 
 Your purpose:
@@ -87,13 +87,13 @@ Rules:
 
 {system_prompt}
 """
-        },
-        {
-            "role": "user",
-            "content": req.message
-        }
-    ]
-)
+                },
+                {
+                    "role": "user",
+                    "content": req.message
+                }
+            ]
+        )
 
         reply = response.choices[0].message.content
 
@@ -109,11 +109,7 @@ Rules:
         return {"reply": reply}
 
     except Exception as e:
-    import traceback
-    return {
-        "error": str(e),
-        "trace": traceback.format_exc()
-    }
+        return {"error": str(e)}
 
 # ===== 查看当前 AI 设置 =====
 @app.get("/admin/settings")
