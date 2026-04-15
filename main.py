@@ -1,5 +1,5 @@
-print("API KEY:", os.getenv("OPENROUTER_API_KEY"))
 import os
+import traceback
 
 from fastapi import FastAPI, Depends
 from pydantic import BaseModel
@@ -17,7 +17,8 @@ app = FastAPI()
 
 client = OpenAI(
     base_url="https://openrouter.ai/api/v1",
-    api_key=os.getenv("OPENROUTER_API_KEY")
+    api_key=os.getenv("OPENROUTER_API_KEY"),
+    timeout=60.0,
 )
 
 # ===== 数据库依赖 =====
@@ -109,11 +110,11 @@ Rules:
         return {"reply": reply}
 
     except Exception as e:
-        import traceback
         return {
             "error": str(e),
             "trace": traceback.format_exc()
         }
+
 # ===== 查看当前 AI 设置 =====
 @app.get("/admin/settings")
 def get_settings(db: Session = Depends(get_db)):
