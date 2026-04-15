@@ -90,7 +90,44 @@ async def verify(request: Request):
 @app.post("/webhook")
 async def webhook(request: Request):
     data = await request.json()
-    print(data)
+    print("INCOMING:", data)
+
+    try:
+        entry = data["entry"][0]["changes"][0]["value"]
+
+        if "messages" in entry:
+            msg = entry["messages"][0]
+
+            # 只处理文本消息
+            if msg.get("type") == "text":
+                user_msg = msg["text"]["body"]
+                from_number = msg["from"]
+
+                print("USER:", user_msg)
+
+                ai_response = client.chat.completions.create(
+                    model="openai/gpt-4o-mini",
+                    messages=[
+                        {
+                            "role": "system",
+                            "content": "You are a professional stock trading assistant."
+                        },
+                        {
+                            "role": "user",
+                            "content": user_msg
+                        }
+                    ]
+                )
+
+                reply_text = ai_response.choices[0].message.content
+                print("AI:", reply_text)
+
+                send_whatsapp_message(from_number, reply_text)
+
+    except Exception as e:
+        print("WEBHOOK ERROR:", str(e))
+        print(traceback.format_exc())
+
     return {"status": "ok"}
 
 @app.post("/chat")
