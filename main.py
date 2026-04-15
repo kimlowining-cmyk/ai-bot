@@ -9,6 +9,31 @@ from openai import OpenAI
 from database import SessionLocal, engine
 from models import Base, ChatMessage, AISettings
 
+import requests  # ✅ 加这里
+
+WHATSAPP_TOKEN = os.getenv("WHATSAPP_TOKEN")
+PHONE_NUMBER_ID = os.getenv("PHONE_NUMBER_ID")
+
+def send_whatsapp_message(to, message):
+    url = f"https://graph.facebook.com/v25.0/{PHONE_NUMBER_ID}/messages"
+
+    headers = {
+        "Authorization": f"Bearer {WHATSAPP_TOKEN}",
+        "Content-Type": "application/json"
+    }
+
+    data = {
+        "messaging_product": "whatsapp",
+        "to": to,
+        "type": "text",
+        "text": {
+            "body": message
+        }
+    }
+
+    res = requests.post(url, headers=headers, json=data)
+    print("SEND RESULT:", res.text)
+    
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
