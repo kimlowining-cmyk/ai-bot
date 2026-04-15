@@ -12,13 +12,13 @@ from models import Base, ChatMessage, AISettings
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
+print("OPENROUTER_API_KEY exists:", bool(os.getenv("OPENROUTER_API_KEY")))
 
 client = OpenAI(
     base_url="https://openrouter.ai/api/v1",
     api_key=os.getenv("OPENROUTER_API_KEY", "").replace("\r", "").replace("\n", "").strip(),
     timeout=60.0,
 )
-
 def get_db():
     db = SessionLocal()
     try:
